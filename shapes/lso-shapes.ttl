@@ -1,0 +1,210 @@
+@prefix lso:  <https://learning.tesseract.academy/lso#> .
+@prefix lsos: <https://learning.tesseract.academy/lso/scheme/> .
+@prefix lsh:  <https://learning.tesseract.academy/lso/shape/> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+################################################################
+# LSO SHACL, layers 1 and 2: syntax and scope.
+#
+# Every constraint here is a statement that some describable input is WRONG. That is the
+# property the incumbent standards lack: CEDS v14 declares no domains, no ranges on its own
+# properties, and no disjointness, so no instance data can contradict it, and CASE's JSON
+# schema constrains shape without constraining meaning.
+################################################################
+
+################################################################
+# Layer 1 — syntax and completeness
+################################################################
+
+lsh:IdentifierAssertionShape a sh:NodeShape ;
+    sh:targetClass lso:IdentifierAssertion ;
+    rdfs:label "Identifier assertion completeness"@en ;
+    sh:property [
+        sh:path lso:identifierScheme ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class lso:IdentifierScheme ;
+        sh:severity sh:Violation ;
+        sh:message "An identifier assertion must name exactly one scheme. An identifier without a scheme is a string." ] ;
+    sh:property [
+        sh:path lso:identifierValue ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+        sh:severity sh:Violation ;
+        sh:message "An identifier assertion must carry exactly one non-empty value." ] ;
+    sh:property [
+        sh:path lso:assertedBy ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "An identifier assertion with no named source cannot be adjudicated when two sources disagree." ] .
+
+lsh:SyntaxByScheme a sh:NodeShape ;
+    sh:targetClass lso:IdentifierAssertion ;
+    rdfs:label "Identifier value matches its scheme's declared syntax"@en ;
+    sh:sparql [
+        sh:severity sh:Violation ;
+        sh:message "Identifier value {?value} does not match the syntax pattern {?pattern} declared for its scheme {?scheme}." ;
+        sh:select """
+            SELECT $this ?value ?pattern ?scheme WHERE {
+              $this <https://learning.tesseract.academy/lso#identifierValue>  ?value ;
+                    <https://learning.tesseract.academy/lso#identifierScheme> ?scheme .
+              ?scheme <https://learning.tesseract.academy/lso#syntaxPattern>  ?pattern .
+              FILTER (!REGEX(?value, ?pattern))
+            }""" ] .
+
+lsh:ResolutionObservationShape a sh:NodeShape ;
+    sh:targetClass lso:ResolutionObservation ;
+    sh:property [
+        sh:path lso:resolutionStatus ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "A resolution observation without a status records nothing." ] ;
+    sh:property [
+        sh:path lso:observedAt ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:severity sh:Violation ;
+        sh:message "A resolution observation without a timestamp cannot be aged out, and a stale liveness claim is worse than none." ] ;
+    sh:property [
+        sh:path lso:resolves ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+        sh:severity sh:Violation ;
+        sh:message "A resolution observation must state, as a boolean, whether the identifier resolved." ] .
+
+lsh:StandardStatementShape a sh:NodeShape ;
+    sh:targetClass lso:StandardStatement ;
+    sh:property [
+        sh:path lso:inDocument ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class lso:StandardsDocument ;
+        sh:severity sh:Violation ;
+        sh:message "Every standard statement belongs to exactly one document. A statement floating free of a document cannot be versioned or deprecated." ] ;
+    sh:property [
+        sh:path lso:statementText ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "A standard statement with no text can be aligned to but not read, which is how empty containers acquire alignment claims." ] ;
+    sh:property [
+        sh:path lso:statementDepth ;
+        sh:datatype xsd:nonNegativeInteger ;
+        sh:maxCount 1 ] .
+
+lsh:StandardsDocumentShape a sh:NodeShape ;
+    sh:targetClass lso:StandardsDocument ;
+    sh:property [
+        sh:path lso:publishedBy ;
+        sh:minCount 1 ;
+        sh:class lso:Jurisdiction ;
+        sh:severity sh:Violation ;
+        sh:message "A standards document must name a publishing jurisdiction." ] ;
+    sh:property [
+        sh:path lso:licenceLabel ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "A standards document with no stated licence cannot be safely redistributed, which silently blocks every downstream open use." ] .
+
+lsh:AdoptionShape a sh:NodeShape ;
+    sh:targetClass lso:Adoption ;
+    sh:property [ sh:path lso:adoptionOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class lso:StandardsDocument ;
+                  sh:severity sh:Violation ; sh:message "An adoption must concern exactly one document." ] ;
+    sh:property [ sh:path lso:adoptedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class lso:Jurisdiction ;
+                  sh:severity sh:Violation ; sh:message "An adoption must name exactly one adopting jurisdiction." ] ;
+    sh:property [ sh:path lso:adoptionStatus ; sh:minCount 1 ; sh:maxCount 1 ;
+                  sh:in ( "Published" "Deprecated" "Draft" "Unstated" ) ;
+                  sh:severity sh:Violation ;
+                  sh:message "Adoption status must be one of Published, Deprecated, Draft or Unstated. Unstated is recorded explicitly: an absent status and a known-absent status are different facts." ] .
+
+lsh:AlignmentAssertionShape a sh:NodeShape ;
+    sh:targetClass lso:AlignmentAssertion ;
+    sh:property [ sh:path lso:alignmentSource ; sh:minCount 1 ; sh:maxCount 1 ; sh:class lso:StandardStatement ;
+                  sh:severity sh:Violation ; sh:message "An alignment must have exactly one source statement." ] ;
+    sh:property [ sh:path lso:alignmentTarget ; sh:minCount 1 ; sh:maxCount 1 ; sh:class lso:StandardStatement ;
+                  sh:severity sh:Violation ; sh:message "An alignment must have exactly one target statement." ] ;
+    sh:property [ sh:path lso:alignmentPredicate ; sh:minCount 1 ; sh:maxCount 1 ; sh:class lso:AlignmentPredicate ;
+                  sh:severity sh:Violation ; sh:message "An alignment must state which correspondence it claims. An untyped link is not an alignment." ] ;
+    sh:property [ sh:path lso:falsifiabilityGrade ; sh:maxCount 1 ;
+                  sh:in ( "machine-refutable" "evidence-refutable" "unfalsifiable" ) ;
+                  sh:severity sh:Violation ;
+                  sh:message "Falsifiability grade must be machine-refutable, evidence-refutable or unfalsifiable." ] .
+
+################################################################
+# Layer 2 — scope: the right identifier at the right level
+################################################################
+
+lsh:ScopeRespected a sh:NodeShape ;
+    sh:targetClass lso:IdentifierAssertion ;
+    rdfs:label "Identifier attached at a level its scheme is entitled to name"@en ;
+    sh:sparql [
+        sh:severity sh:Violation ;
+        sh:message "Scheme {?scheme} is not declared entitled to name artefacts of type {?type}, but is attached to one." ;
+        sh:select """
+            SELECT $this ?scheme ?type WHERE {
+              ?artefact <https://learning.tesseract.academy/lso#identifiedBy> $this .
+              $this     <https://learning.tesseract.academy/lso#identifierScheme> ?scheme .
+              {
+                ?artefact a <https://learning.tesseract.academy/lso#StandardsDocument> .
+                BIND(<https://learning.tesseract.academy/lso#StandardsDocument> AS ?type)
+                BIND(<https://learning.tesseract.academy/lso/scheme/DocumentScope> AS ?required)
+              } UNION {
+                ?artefact a <https://learning.tesseract.academy/lso#StandardStatement> .
+                BIND(<https://learning.tesseract.academy/lso#StandardStatement> AS ?type)
+                BIND(<https://learning.tesseract.academy/lso/scheme/StatementScope> AS ?required)
+              } UNION {
+                ?artefact a <https://learning.tesseract.academy/lso#Jurisdiction> .
+                BIND(<https://learning.tesseract.academy/lso#Jurisdiction> AS ?type)
+                BIND(<https://learning.tesseract.academy/lso/scheme/JurisdictionScope> AS ?required)
+              }
+              FILTER NOT EXISTS { ?scheme <https://learning.tesseract.academy/lso#schemeScope> ?required }
+            }""" ] .
+
+lsh:ASNPrefixMatchesLevel a sh:NodeShape ;
+    sh:targetClass lso:IdentifierAssertion ;
+    rdfs:label "ASN D-prefix names documents, S-prefix names statements"@en ;
+    sh:sparql [
+        sh:severity sh:Violation ;
+        sh:message "ASN identifier {?value} carries the wrong prefix for the artefact it names: D names documents, S names statements." ;
+        sh:select """
+            SELECT $this ?value WHERE {
+              ?artefact <https://learning.tesseract.academy/lso#identifiedBy> $this .
+              $this <https://learning.tesseract.academy/lso#identifierScheme> <https://learning.tesseract.academy/lso/scheme/ASN> ;
+                    <https://learning.tesseract.academy/lso#identifierValue>  ?value .
+              {
+                ?artefact a <https://learning.tesseract.academy/lso#StandardsDocument> .
+                FILTER (!STRSTARTS(?value, "D"))
+              } UNION {
+                ?artefact a <https://learning.tesseract.academy/lso#StandardStatement> .
+                FILTER (!STRSTARTS(?value, "S"))
+              }
+            }""" ] .
+
+lsh:ParentWithinSameDocument a sh:NodeShape ;
+    sh:targetClass lso:StandardStatement ;
+    rdfs:label "Statement hierarchy does not cross document boundaries"@en ;
+    sh:sparql [
+        sh:severity sh:Violation ;
+        sh:message "Statement's parent lies in a different document, so the containment tree crosses a versioning boundary." ;
+        sh:select """
+            SELECT $this WHERE {
+              $this <https://learning.tesseract.academy/lso#hasParentStatement> ?p ;
+                    <https://learning.tesseract.academy/lso#inDocument> ?d1 .
+              ?p    <https://learning.tesseract.academy/lso#inDocument> ?d2 .
+              FILTER (?d1 != ?d2)
+            }""" ] .
+
+lsh:DepthConsistent a sh:NodeShape ;
+    sh:targetClass lso:StandardStatement ;
+    rdfs:label "Declared depth agrees with the parent chain"@en ;
+    sh:sparql [
+        sh:severity sh:Warning ;
+        sh:message "Declared depth {?d} is not one greater than its parent's declared depth {?pd}." ;
+        sh:select """
+            SELECT $this ?d ?pd WHERE {
+              $this <https://learning.tesseract.academy/lso#hasParentStatement> ?p ;
+                    <https://learning.tesseract.academy/lso#statementDepth> ?d .
+              ?p    <https://learning.tesseract.academy/lso#statementDepth> ?pd .
+              FILTER (?d != ?pd + 1)
+            }""" ] .

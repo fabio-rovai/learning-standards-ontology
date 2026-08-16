@@ -1,0 +1,226 @@
+@prefix lso:   <https://learning.tesseract.academy/lso#> .
+@prefix lsos:  <https://learning.tesseract.academy/lso/scheme/> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+################################################################
+# LSO identifier-scheme registry
+#
+# Every scheme records three things the incumbent standards leave implicit:
+#   lso:schemeScope         what level of artefact the scheme is entitled to name
+#   lso:dereferenceable     whether the scheme PROMISES that its identifiers resolve
+#   lso:custodyStatus       whether anyone is currently keeping that promise
+#
+# The gap between the second and the third is the entire subject of this repository.
+################################################################
+
+lsos:Registry a skos:ConceptScheme ;
+    dcterms:title "LSO Identifier Scheme Registry"@en ;
+    skos:prefLabel "LSO Identifier Scheme Registry"@en ;
+    dcterms:description "Identifier schemes in use across US and international K-12 academic standards data."@en .
+
+lso:schemeScope a owl:ObjectProperty ;
+    rdfs:label "scheme scope"@en ;
+    rdfs:domain lso:IdentifierScheme ;
+    rdfs:range lso:ScopeLevel ;
+    rdfs:comment "The artefact level this scheme is entitled to name. Enforced by SHACL: a document-scoped identifier on a statement is a modelling error, not a preference."@en .
+
+lso:ScopeLevel a owl:Class ; rdfs:label "Scope Level"@en ; rdfs:subClassOf skos:Concept .
+lsos:DocumentScope    a lso:ScopeLevel ; skos:prefLabel "document-scoped"@en ; skos:inScheme lsos:Registry .
+lsos:StatementScope   a lso:ScopeLevel ; skos:prefLabel "statement-scoped"@en ; skos:inScheme lsos:Registry .
+lsos:JurisdictionScope a lso:ScopeLevel ; skos:prefLabel "jurisdiction-scoped"@en ; skos:inScheme lsos:Registry .
+lsos:ElementScope     a lso:ScopeLevel ; skos:prefLabel "data-element-scoped"@en ; skos:inScheme lsos:Registry .
+
+lso:syntaxPattern a owl:DatatypeProperty ;
+    rdfs:label "syntax pattern"@en ; rdfs:domain lso:IdentifierScheme ; rdfs:range xsd:string .
+lso:dereferenceable a owl:DatatypeProperty ;
+    rdfs:label "dereferenceable"@en ; rdfs:domain lso:IdentifierScheme ; rdfs:range xsd:boolean ;
+    rdfs:comment "True when the scheme's own documentation promises that its identifiers are HTTP-resolvable."@en .
+lso:custodyStatus a owl:DatatypeProperty ;
+    rdfs:label "custody status"@en ; rdfs:domain lso:IdentifierScheme ; rdfs:range xsd:string ;
+    rdfs:comment "maintained, orphaned, or federated. Orphaned means the scheme still has users but no operator honouring its resolution promise."@en .
+lso:globallyUnique a owl:DatatypeProperty ;
+    rdfs:label "globally unique"@en ; rdfs:domain lso:IdentifierScheme ; rdfs:range xsd:boolean .
+lso:mintedPer a owl:DatatypeProperty ;
+    rdfs:label "minted per"@en ; rdfs:domain lso:IdentifierScheme ; rdfs:range xsd:string ;
+    rdfs:comment "The authority boundary within which values are unique: global, per-server, or per-document."@en .
+
+################################################################
+# ASN — Achievement Standards Network
+################################################################
+
+lsos:ASN a lso:IdentifierScheme ;
+    skos:prefLabel "ASN resource identifier"@en ;
+    skos:altLabel "asnIdentifier"@en ;
+    skos:inScheme lsos:Registry ;
+    skos:definition """Identifiers minted by the Achievement Standards Network for standards documents
+(D-prefixed) and standard statements (S-prefixed), published as dereferenceable RDF under
+http://purl.org/ASN/resources/. ASN was the linked-data identifier layer that LRMI's
+educationalAlignment pattern was designed around, so ASN identifiers are embedded in learning-resource
+metadata across the open education web."""@en ;
+    lso:schemeScope lsos:DocumentScope , lsos:StatementScope ;
+    lso:syntaxPattern "^[SD][0-9A-F]{6,8}$" ;
+    lso:dereferenceable true ;
+    lso:custodyStatus "orphaned" ;
+    lso:globallyUnique true ;
+    lso:mintedPer "global" ;
+    rdfs:seeAlso <http://purl.org/ASN/schema/core/> ;
+    skos:scopeNote """The vocabulary and the data have separated. As measured by this repository, the
+ASN schema document still resolves, served from a static object store, while the resource identifiers
+it describes do not. A scheme that promises dereferenceability and no longer delivers it is worse than
+one that never promised, because downstream systems encoded the promise."""@en .
+
+################################################################
+# CASE — Competencies and Academic Standards Exchange (1EdTech)
+################################################################
+
+lsos:CASEGUID a lso:IdentifierScheme ;
+    skos:prefLabel "CASE GUID"@en ;
+    skos:inScheme lsos:Registry ;
+    skos:definition """UUIDs minted by a CASE server for CFDocuments, CFItems and CFAssociations, and
+exposed as URIs rooted at that server's host."""@en ;
+    lso:schemeScope lsos:DocumentScope , lsos:StatementScope ;
+    lso:syntaxPattern "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" ;
+    lso:dereferenceable true ;
+    lso:custodyStatus "federated" ;
+    lso:globallyUnique true ;
+    lso:mintedPer "per-server" ;
+    skos:scopeNote """A UUID is unique but not identifying: two CASE servers publishing the same state
+standards mint different GUIDs for the same statement, and CASE defines no obligation to carry the
+prior identifier forward. The successor to ASN therefore does not, in general, say which ASN
+identifier its items replace."""@en .
+
+lsos:HumanCodingScheme a lso:IdentifierScheme ;
+    skos:prefLabel "human coding scheme"@en ;
+    skos:altLabel "statement notation"@en ;
+    skos:inScheme lsos:Registry ;
+    skos:definition """The short notation printed in the published standards document and recognised by
+teachers, such as CCSS.MATH.CONTENT.5.NF.A.1 or POL-5.B."""@en ;
+    lso:schemeScope lsos:StatementScope ;
+    lso:dereferenceable false ;
+    lso:custodyStatus "maintained" ;
+    lso:globallyUnique false ;
+    lso:mintedPer "per-document" ;
+    skos:scopeNote """The only identifier in this registry that practitioners actually use, and the only
+one that is not globally unique. It is reused across revisions of the same framework and collides
+across jurisdictions, so it can support human lookup and cannot support machine identity. Systems that
+join on it are joining on a label."""@en .
+
+################################################################
+# Common Standards Project
+################################################################
+
+lsos:CSP a lso:IdentifierScheme ;
+    skos:prefLabel "Common Standards Project identifier"@en ;
+    skos:inScheme lsos:Registry ;
+    skos:definition """32-character hexadecimal identifiers minted by the Common Standards Project for
+jurisdictions, standard sets and individual standards, served over a public JSON API."""@en ;
+    lso:schemeScope lsos:JurisdictionScope , lsos:DocumentScope , lsos:StatementScope ;
+    lso:syntaxPattern "^[0-9A-F]{32}$" ;
+    lso:dereferenceable true ;
+    lso:custodyStatus "maintained" ;
+    lso:globallyUnique true ;
+    lso:mintedPer "global" ;
+    skos:scopeNote """Carries the ASN identifier alongside its own where one existed, which makes it the
+best surviving bridge between the ASN generation and the present, and the reason the extent of ASN
+identifier loss can be measured at all."""@en .
+
+################################################################
+# CEDS — Common Education Data Standards (US Department of Education)
+################################################################
+
+lsos:CEDSElement a lso:IdentifierScheme ;
+    skos:prefLabel "CEDS element identifier"@en ;
+    skos:inScheme lsos:Registry ;
+    skos:definition """C-prefixed identifiers for CEDS data elements and option sets, published under
+https://w3id.org/CEDStandards/terms/ and redirecting to the CEDS element browser."""@en ;
+    lso:schemeScope lsos:ElementScope ;
+    lso:syntaxPattern "^C[0-9]{6}$" ;
+    lso:dereferenceable true ;
+    lso:custodyStatus "maintained" ;
+    lso:globallyUnique true ;
+    lso:mintedPer "global" ;
+    skos:scopeNote """Names data elements, not standards. CEDS has an element for whether a course is
+aligned with standards and no way to say which standard, so it cannot be the identifier layer for
+alignment even though it is the only federally maintained scheme here."""@en .
+
+lsos:SCED a lso:IdentifierScheme ;
+    skos:prefLabel "SCED course code"@en ;
+    skos:altLabel "School Courses for the Exchange of Data"@en ;
+    skos:inScheme lsos:Registry ;
+    skos:definition "Five-digit federal course codes maintained by NCES and carried inside CEDS as an option set."@en ;
+    lso:schemeScope lsos:DocumentScope ;
+    lso:syntaxPattern "^[0-9]{5}$" ;
+    lso:dereferenceable false ;
+    lso:custodyStatus "maintained" ;
+    lso:globallyUnique true ;
+    lso:mintedPer "global" ;
+    skos:scopeNote """Has real subject-area and course-level structure that CEDS publishes as a flat
+list of concepts with no broader or narrower relations, so the hierarchy is discarded in the RDF."""@en .
+
+################################################################
+# CTDL-ASN — Credential Engine
+################################################################
+
+lsos:CTDLASN a lso:IdentifierScheme ;
+    skos:prefLabel "Credential Engine Registry identifier"@en ;
+    skos:altLabel "ce-UUID"@en ;
+    skos:inScheme lsos:Registry ;
+    skos:definition """ce-prefixed UUIDs minted by the Credential Engine Registry for competency
+frameworks and competencies expressed in CTDL-ASN, the vocabulary that inherited the ASN name."""@en ;
+    lso:schemeScope lsos:DocumentScope , lsos:StatementScope ;
+    lso:syntaxPattern "^ce-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" ;
+    lso:dereferenceable true ;
+    lso:custodyStatus "maintained" ;
+    lso:globallyUnique true ;
+    lso:mintedPer "global" ;
+    skos:scopeNote "Inherited the ASN vocabulary lineage but not the ASN identifier space; it mints fresh UUIDs."@en .
+
+################################################################
+# Alignment predicates, graded by what could refute them
+################################################################
+
+lsos:Predicates a skos:ConceptScheme ;
+    dcterms:title "LSO Alignment Predicate Scheme"@en ;
+    skos:prefLabel "LSO Alignment Predicate Scheme"@en .
+
+lsos:exactMatch a lso:AlignmentPredicate ; skos:inScheme lsos:Predicates ;
+    skos:prefLabel "exact match"@en ;
+    skos:definition "The two statements express the same expectation and may be substituted for one another."@en ;
+    lso:defaultFalsifiability "machine-refutable" ;
+    skos:scopeNote "Refutable in the graph: exact match is symmetric and transitive, so a chain of exact matches that reaches two statements in the same document at different depths is inconsistent."@en .
+
+lsos:narrowMatch a lso:AlignmentPredicate ; skos:inScheme lsos:Predicates ;
+    skos:prefLabel "narrow match"@en ;
+    skos:definition "The source statement expresses a strictly narrower expectation than the target."@en ;
+    lso:defaultFalsifiability "machine-refutable" ;
+    skos:scopeNote "Refutable in the graph: narrowing is asymmetric, so an asserted cycle refutes the claim."@en .
+
+lsos:broadMatch a lso:AlignmentPredicate ; skos:inScheme lsos:Predicates ;
+    skos:prefLabel "broad match"@en ;
+    skos:definition "The source statement expresses a strictly broader expectation than the target."@en ;
+    lso:defaultFalsifiability "machine-refutable" .
+
+lsos:isChildOf a lso:AlignmentPredicate ; skos:inScheme lsos:Predicates ;
+    skos:prefLabel "is child of"@en ;
+    skos:definition "Structural containment within a single document. Carries no cross-framework meaning."@en ;
+    lso:defaultFalsifiability "machine-refutable" ;
+    skos:scopeNote """The overwhelming majority of associations in published CASE packages are of this
+kind. They are tree edges, not alignments, and counting them as semantic content overstates how much
+alignment data exists."""@en .
+
+lsos:isRelatedTo a lso:AlignmentPredicate ; skos:inScheme lsos:Predicates ;
+    skos:prefLabel "is related to"@en ;
+    skos:definition "An unspecified association between two statements."@en ;
+    lso:defaultFalsifiability "unfalsifiable" ;
+    skos:scopeNote """No condition counts against it. It is the most common cross-framework predicate in
+practice and the least useful, because a claim that cannot fail cannot inform a decision."""@en .
+
+lso:defaultFalsifiability a owl:DatatypeProperty ;
+    rdfs:label "default falsifiability"@en ;
+    rdfs:domain lso:AlignmentPredicate ;
+    rdfs:range xsd:string .

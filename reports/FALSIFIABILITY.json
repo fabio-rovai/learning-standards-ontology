@@ -1,0 +1,23 @@
+{
+ "generated": "2026-08-16",
+ "rows": [
+  {
+   "artefact": "LSO (this repository)",
+   "detected": 6,
+   "inexpressible": 0,
+   "total": 6
+  },
+  {
+   "artefact": "CEDS Ontology v14",
+   "detected": 0,
+   "inexpressible": 5,
+   "total": 6
+  },
+  {
+   "artefact": "ASN schema",
+   "detected": 1,
+   "inexpressible": 2,
+   "total": 6
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# Harvested source data is not redistributed: several sources state no licence at all,
+# which is itself one of this repository's findings. Everything here is regenerable.
+data/*.rdf
+data/*.json
+data/*.json.gz
+data/*.ttl
+data/*.nq

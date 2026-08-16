@@ -1,0 +1,12 @@
+# Which standards documents can lawfully be redistributed, and which cannot be told apart from
+# those that cannot. Public policy that carries no licence is a silent block on every open use.
+PREFIX lso: <https://learning.tesseract.academy/lso#>
+
+SELECT ?licence (COUNT(DISTINCT ?doc) AS ?documents)
+WHERE {
+  ?doc a lso:StandardsDocument .
+  OPTIONAL { ?doc lso:licenceLabel ?l }
+  BIND(COALESCE(?l, "NO LICENCE STATED") AS ?licence)
+}
+GROUP BY ?licence
+ORDER BY DESC(?documents)

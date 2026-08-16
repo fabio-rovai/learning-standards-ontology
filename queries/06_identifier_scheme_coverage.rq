@@ -1,0 +1,17 @@
+# For every statement in the graph, which identifier schemes name it. The join surface available
+# to anyone trying to reconcile two education systems.
+PREFIX lso: <https://learning.tesseract.academy/lso#>
+
+SELECT ?schemeCombination (COUNT(?s) AS ?statements)
+WHERE {
+  {
+    SELECT ?s (GROUP_CONCAT(DISTINCT STRAFTER(STR(?scheme), "scheme/"); separator=" + ") AS ?schemeCombination)
+    WHERE {
+      ?s a lso:StandardStatement ; lso:identifiedBy ?ia .
+      ?ia lso:identifierScheme ?scheme .
+    }
+    GROUP BY ?s
+  }
+}
+GROUP BY ?schemeCombination
+ORDER BY DESC(?statements)

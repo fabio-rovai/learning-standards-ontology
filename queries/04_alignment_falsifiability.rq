@@ -1,0 +1,13 @@
+# Of every alignment claim in the graph, how many could in principle be shown to be wrong.
+PREFIX lso:  <https://learning.tesseract.academy/lso#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?predicate ?grade (COUNT(?a) AS ?alignments)
+WHERE {
+  ?a a lso:AlignmentAssertion ;
+     lso:alignmentPredicate ?predicate .
+  OPTIONAL { ?predicate lso:defaultFalsifiability ?g }
+  BIND(COALESCE(?g, "ungraded") AS ?grade)
+}
+GROUP BY ?predicate ?grade
+ORDER BY DESC(?alignments)

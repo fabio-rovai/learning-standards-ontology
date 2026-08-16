@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+title: "Learning Standards Ontology (LSO)"
+message: "If you use this ontology or its findings, please cite it."
+type: software
+authors:
+  - family-names: Rovai
+    given-names: Fabio
+    affiliation: "Kampakis and Co Ltd t/a The Tesseract Academy"
+repository-code: "https://github.com/fabio-rovai/learning-standards-ontology"
+abstract: >-
+  An OWL 2 ontology, SKOS identifier-scheme registry and SHACL governance layer for K-12 academic
+  standards, together with a census of identifier resolvability across the public standards corpus
+  and a measurement of what the incumbent standards can and cannot reject.
+license: CC-BY-4.0

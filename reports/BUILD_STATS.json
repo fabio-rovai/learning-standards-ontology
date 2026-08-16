@@ -1,0 +1,30 @@
+{
+ "generated": "2026-08-16T16:53:05+00:00",
+ "scope": "asn",
+ "stats": {
+  "jurisdictions": 771,
+  "surrogate_documents": 13710,
+  "statements_distinct": 1931373,
+  "statement_rows": 1931913,
+  "statements_in_scope": 993098,
+  "documents_surrogate": 13710,
+  "documents_with_licence_row": 16132,
+  "adoptions": 16768,
+  "adoption_Unstated": 10314,
+  "documents": 16767,
+  "adoption_Published": 4911,
+  "adoption_Deprecated": 1543,
+  "documents_source_declared": 3057,
+  "documents_without_licence": 636,
+  "asn_assertions": 996049,
+  "asn_not_in_census": 972789,
+  "asn_dead": 23260,
+  "hcs_assertions": 674233,
+  "statements": 993098,
+  "case_alignments": 2483,
+  "case_assoc_isChildOf": 2453,
+  "case_assoc_isRelatedTo": 30,
+  "case_items": 2453,
+  "triples": 21404069
+ }
+}

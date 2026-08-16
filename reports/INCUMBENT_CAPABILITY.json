@@ -1,0 +1,246 @@
+{
+ "generated": "2026-08-16",
+ "rdf": [
+  {
+   "label": "CEDS Ontology v14 (US Department of Education)",
+   "triples": 243601,
+   "classes": 967,
+   "objectProperties": 0,
+   "datatypeProperties": 0,
+   "rdfProperties": 2336,
+   "concepts": 19546,
+   "conceptSchemes": 966,
+   "classesThatAreAlsoSchemes": 965,
+   "externalAlignments": 1,
+   "axioms": {
+    "rdfs:subClassOf": 1381,
+    "rdfs:subPropertyOf": 0,
+    "owl:equivalentClass": 0,
+    "owl:inverseOf": 0,
+    "owl:TransitiveProperty": 0,
+    "owl:SymmetricProperty": 0,
+    "skos:broader": 0,
+    "skos:narrower": 0,
+    "rdfs:domain": 0,
+    "rdfs:range": 6,
+    "owl:disjointWith": 0,
+    "owl:AllDisjointClasses": 0,
+    "owl:FunctionalProperty": 0,
+    "owl:InverseFunctionalProperty": 0,
+    "owl:IrreflexiveProperty": 0,
+    "owl:AsymmetricProperty": 0,
+    "owl:someValuesFrom": 0,
+    "owl:allValuesFrom": 18,
+    "owl:cardinality": 0,
+    "owl:minCardinality": 0,
+    "owl:maxCardinality": 0,
+    "owl:complementOf": 0,
+    "owl:propertyDisjointWith": 0
+   },
+   "entailingTotal": 1381,
+   "refutingTotal": 24,
+   "namespaces": [
+    [
+     "https://w3id.org/CEDStandards/terms/",
+     279279
+    ],
+    [
+     "http://www.w3.org/2002/07/owl#",
+     20550
+    ],
+    [
+     "http://www.w3.org/2004/02/skos/core#",
+     20512
+    ],
+    [
+     "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+     3964
+    ],
+    [
+     "http://www.w3.org/2001/XMLSchema#",
+     994
+    ],
+    [
+     "http://www.w3.org/2000/01/rdf-schema#",
+     411
+    ],
+    [
+     "http://purl.org/dc/terms/",
+     1
+    ],
+    [
+     "dc:format/",
+     1
+    ]
+   ]
+  },
+  {
+   "label": "ASN schema (Achievement Standards Network)",
+   "triples": 465,
+   "classes": 0,
+   "objectProperties": 0,
+   "datatypeProperties": 0,
+   "rdfProperties": 57,
+   "concepts": 0,
+   "conceptSchemes": 0,
+   "classesThatAreAlsoSchemes": 0,
+   "externalAlignments": 0,
+   "axioms": {
+    "rdfs:subClassOf": 2,
+    "rdfs:subPropertyOf": 16,
+    "owl:equivalentClass": 0,
+    "owl:inverseOf": 0,
+    "owl:TransitiveProperty": 0,
+    "owl:SymmetricProperty": 0,
+    "skos:broader": 0,
+    "skos:narrower": 0,
+    "rdfs:domain": 62,
+    "rdfs:range": 59,
+    "owl:disjointWith": 0,
+    "owl:AllDisjointClasses": 0,
+    "owl:FunctionalProperty": 0,
+    "owl:InverseFunctionalProperty": 0,
+    "owl:IrreflexiveProperty": 0,
+    "owl:AsymmetricProperty": 0,
+    "owl:someValuesFrom": 0,
+    "owl:allValuesFrom": 0,
+    "owl:cardinality": 0,
+    "owl:minCardinality": 0,
+    "owl:maxCardinality": 0,
+    "owl:complementOf": 0,
+    "owl:propertyDisjointWith": 0
+   },
+   "entailingTotal": 18,
+   "refutingTotal": 121,
+   "namespaces": [
+    [
+     "http://purl.org/ASN/schema/core/",
+     631
+    ],
+    [
+     "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+     64
+    ],
+    [
+     "http://www.w3.org/2000/01/rdf-schema#",
+     28
+    ],
+    [
+     "http://purl.org/dc/terms/",
+     14
+    ],
+    [
+     "http://achievementstandards.org/ASN/schema/core/",
+     10
+    ],
+    [
+     "https://ceds.ed.gov/",
+     4
+    ],
+    [
+     "http://www.w3.org/2004/02/skos/core#",
+     4
+    ],
+    [
+     "http://www.w3.org/2001/XMLSchema#",
+     3
+    ]
+   ]
+  },
+  {
+   "label": "LSO (this repository)",
+   "triples": 440,
+   "classes": 19,
+   "objectProperties": 16,
+   "datatypeProperties": 24,
+   "rdfProperties": 0,
+   "concepts": 0,
+   "conceptSchemes": 2,
+   "classesThatAreAlsoSchemes": 0,
+   "externalAlignments": 0,
+   "axioms": {
+    "rdfs:subClassOf": 8,
+    "rdfs:subPropertyOf": 1,
+    "owl:equivalentClass": 2,
+    "owl:inverseOf": 0,
+    "owl:TransitiveProperty": 1,
+    "owl:SymmetricProperty": 0,
+    "skos:broader": 0,
+    "skos:narrower": 0,
+    "rdfs:domain": 40,
+    "rdfs:range": 40,
+    "owl:disjointWith": 0,
+    "owl:AllDisjointClasses": 1,
+    "owl:FunctionalProperty": 15,
+    "owl:InverseFunctionalProperty": 0,
+    "owl:IrreflexiveProperty": 1,
+    "owl:AsymmetricProperty": 1,
+    "owl:someValuesFrom": 1,
+    "owl:allValuesFrom": 0,
+    "owl:cardinality": 0,
+    "owl:minCardinality": 0,
+    "owl:maxCardinality": 1,
+    "owl:complementOf": 0,
+    "owl:propertyDisjointWith": 0
+   },
+   "entailingTotal": 12,
+   "refutingTotal": 100,
+   "namespaces": [
+    [
+     "https://learning.tesseract.academy/lso#",
+     337
+    ],
+    [
+     "https://learning.tesseract.academy/lso/scheme/",
+     162
+    ],
+    [
+     "http://www.w3.org/2002/07/owl#",
+     82
+    ],
+    [
+     "http://www.w3.org/2001/XMLSchema#",
+     24
+    ],
+    [
+     "https://learning.tesseract.academy/",
+     8
+    ],
+    [
+     "http://www.w3.org/2004/02/skos/core#",
+     6
+    ],
+    [
+     "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+     5
+    ],
+    [
+     "http://www.w3.org/ns/prov#",
+     2
+    ]
+   ]
+  }
+ ],
+ "case": {
+  "label": "CASE package, Georgia Computer Science GSE (live)",
+  "cfItems": 2453,
+  "cfAssociations": 2483,
+  "associationTypes": [
+   [
+    "isChildOf",
+    2453
+   ],
+   [
+    "isRelatedTo",
+    30
+   ]
+  ],
+  "structuralShare": 0.9879178413209827,
+  "semanticAssociations": 30,
+  "crossFrameworkAssociations": 0,
+  "itemsWithHumanCodingScheme": 2430,
+  "itemsWithoutHumanCodingScheme": 23,
+  "entailingTotal": 0,
+  "refutingTotal": 0
+ }
+}

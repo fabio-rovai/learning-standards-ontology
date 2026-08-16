@@ -1,0 +1,17 @@
+# R1 as a query: statements still published and still cited whose only global identifier is dead.
+PREFIX lso:  <https://learning.tesseract.academy/lso#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?statement ?asnValue ?citations ?text
+WHERE {
+  ?statement a lso:StandardStatement ;
+             lso:identifiedBy ?ia .
+  ?ia lso:identifierScheme <https://learning.tesseract.academy/lso/scheme/ASN> ;
+      lso:identifierValue  ?asnValue ;
+      lso:resolution       ?obs .
+  ?obs lso:resolves false .
+  OPTIONAL { ?ia lso:citationCount ?citations }
+  OPTIONAL { ?statement lso:statementText ?text }
+}
+ORDER BY DESC(?citations)
+LIMIT 100

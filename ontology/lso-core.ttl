@@ -1,0 +1,341 @@
+@prefix lso:   <https://learning.tesseract.academy/lso#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix vann:  <http://purl.org/vocab/vann/> .
+
+<https://learning.tesseract.academy/lso>
+    a owl:Ontology ;
+    dcterms:title "Learning Standards Ontology (LSO)"@en ;
+    dcterms:description """An OWL 2 ontology for academic standards, the identifiers that name them, and
+the alignment claims made about them. LSO exists because the three incumbent artefacts in this
+space each drop one of those three things: CEDS carries elements but no logical axioms, ASN carried
+identifiers but no longer serves them, and CASE carries documents but no cross-framework identity.
+
+The design commitment is that an identifier is a first-class node whose resolvability is recorded
+data, and that an alignment is a first-class node that records what evidence would refute it."""@en ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:creator "Kampakis and Co Ltd t/a The Tesseract Academy" ;
+    vann:preferredNamespacePrefix "lso" ;
+    vann:preferredNamespaceUri "https://learning.tesseract.academy/lso#" ;
+    owl:versionInfo "0.1.0" .
+
+################################################################
+# 1. The things standards are about
+################################################################
+
+lso:Jurisdiction a owl:Class ;
+    rdfs:label "Jurisdiction"@en ;
+    skos:definition """A body with the authority to adopt or publish a set of academic standards: a
+state or national education agency, a professional or subject association, a school system, or a
+commercial publisher."""@en .
+
+lso:StandardsDocument a owl:Class ;
+    rdfs:label "Standards Document"@en ;
+    skos:definition """A published, versioned set of academic standards issued as a single work, such
+as a state course of study or a subject framework. The unit that gets adopted, deprecated and
+replaced."""@en .
+
+lso:StandardStatement a owl:Class ;
+    rdfs:label "Standard Statement"@en ;
+    skos:definition """A single normative statement of expected learning within a standards document:
+a standard, benchmark, learning objective, or indicator. The unit that content and assessments are
+aligned to."""@en .
+
+lso:EducationLevel a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Education Level"@en ;
+    skos:definition "A grade or stage to which a standard statement applies."@en .
+
+lso:Adoption a owl:Class ;
+    rdfs:label "Adoption"@en ;
+    skos:definition """The time-bounded act of a jurisdiction putting a standards document into force.
+Reified because the same document is adopted by different jurisdictions at different times and with
+different statuses, so adoption status is not a property of the document."""@en .
+
+# The three primary classes are pairwise disjoint. CEDS v14 declares no disjointness at all,
+# which is the single largest reason nothing asserted against it can ever be inconsistent.
+[] a owl:AllDisjointClasses ;
+   owl:members ( lso:Jurisdiction lso:StandardsDocument lso:StandardStatement
+                 lso:Adoption lso:IdentifierAssertion lso:AlignmentAssertion
+                 lso:IdentifierScheme ) .
+
+################################################################
+# 2. Identifiers as first-class nodes
+################################################################
+
+lso:IdentifierScheme a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Identifier Scheme"@en ;
+    skos:definition """A system that mints names for standards artefacts: ASN resource identifiers,
+CASE GUIDs, Common Standards Project identifiers, human coding schemes such as CCSS notation, SCED
+course codes, CEDS element identifiers, CTDL-ASN registry identifiers."""@en .
+
+lso:IdentifierAssertion a owl:Class ;
+    rdfs:label "Identifier Assertion"@en ;
+    skos:definition """The claim, made by some source, that a given standards artefact is named by a
+given value in a given scheme. Reified so that the same statement can carry conflicting identifiers
+from different sources, and so that whether the identifier still resolves is recorded rather than
+assumed."""@en .
+
+lso:identifiedBy a owl:ObjectProperty ;
+    rdfs:label "identified by"@en ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( lso:StandardsDocument lso:StandardStatement lso:Jurisdiction ) ] ;
+    rdfs:range lso:IdentifierAssertion ;
+    skos:definition "Links an artefact to a reified claim about one of its names."@en .
+
+lso:identifierScheme a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "identifier scheme"@en ;
+    rdfs:domain lso:IdentifierAssertion ;
+    rdfs:range lso:IdentifierScheme .
+
+lso:identifierValue a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "identifier value"@en ;
+    rdfs:domain lso:IdentifierAssertion ;
+    rdfs:range xsd:string .
+
+lso:assertedBy a owl:ObjectProperty ;
+    rdfs:label "asserted by"@en ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( lso:IdentifierAssertion lso:AlignmentAssertion ) ] ;
+    rdfs:range prov:Agent ;
+    skos:definition "The source that made this claim. Two sources may disagree; both claims persist."@en .
+
+################################################################
+# 3. Resolvability, recorded rather than assumed
+################################################################
+# This is the part with no counterpart in CEDS, CASE or ASN. A dereferenceable identifier scheme
+# makes a promise, and whether that promise is currently kept is an observable fact with a date.
+
+lso:ResolutionObservation a owl:Class ;
+    rdfs:label "Resolution Observation"@en ;
+    rdfs:subClassOf prov:Activity ;
+    skos:definition """A dated observation of what happened when an identifier was dereferenced: the
+HTTP status returned, the media type served, and the URL finally reached after redirects."""@en .
+
+lso:resolution a owl:ObjectProperty ;
+    rdfs:label "resolution"@en ;
+    rdfs:domain lso:IdentifierAssertion ;
+    rdfs:range lso:ResolutionObservation .
+
+lso:resolutionStatus a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "resolution status"@en ;
+    rdfs:domain lso:ResolutionObservation ;
+    rdfs:range xsd:string ;
+    skos:definition "HTTP status code as a string, or an error token such as ERR:timeout."@en .
+
+lso:resolves a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "resolves"@en ;
+    rdfs:domain lso:ResolutionObservation ;
+    rdfs:range xsd:boolean ;
+    skos:definition "True when dereferencing returned a 2xx status."@en .
+
+lso:observedAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "observed at"@en ;
+    rdfs:domain lso:ResolutionObservation ;
+    rdfs:range xsd:dateTime .
+
+lso:resolvedMediaType a owl:DatatypeProperty ;
+    rdfs:label "resolved media type"@en ;
+    rdfs:domain lso:ResolutionObservation ;
+    rdfs:range xsd:string .
+
+lso:finalURL a owl:DatatypeProperty ;
+    rdfs:label "final URL"@en ;
+    rdfs:domain lso:ResolutionObservation ;
+    rdfs:range xsd:anyURI ;
+    skos:definition "The URL reached after following redirects, which is how a live indirection layer over dead data is detected."@en .
+
+lso:citationCount a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "citation count"@en ;
+    rdfs:domain lso:IdentifierAssertion ;
+    rdfs:range xsd:nonNegativeInteger ;
+    skos:definition "How many times this identifier was observed in the surveyed public corpus. A dead identifier with many citations is a migration liability, not a curiosity."@en .
+
+################################################################
+# 4. Structure within a document
+################################################################
+
+lso:inDocument a owl:ObjectProperty ;
+    rdfs:label "in document"@en ;
+    rdfs:domain lso:StandardStatement ;
+    rdfs:range lso:StandardsDocument .
+
+lso:hasParentStatement a owl:ObjectProperty ;
+    rdfs:label "has parent statement"@en ;
+    rdfs:domain lso:StandardStatement ;
+    rdfs:range lso:StandardStatement ;
+    a owl:IrreflexiveProperty , owl:AsymmetricProperty .
+
+lso:hasAncestorStatement a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "has ancestor statement"@en ;
+    rdfs:domain lso:StandardStatement ;
+    rdfs:range lso:StandardStatement .
+
+lso:hasParentStatement rdfs:subPropertyOf lso:hasAncestorStatement .
+
+lso:statementText a owl:DatatypeProperty ;
+    rdfs:label "statement text"@en ;
+    rdfs:domain lso:StandardStatement ;
+    rdfs:range xsd:string .
+
+lso:humanCodingScheme a owl:DatatypeProperty ;
+    rdfs:label "human coding scheme"@en ;
+    rdfs:domain lso:StandardStatement ;
+    rdfs:range xsd:string ;
+    skos:definition "The short notation a teacher would recognise, such as CCSS.MATH.CONTENT.5.NF.A.1. Not globally unique, which is precisely why it cannot serve as the identifier."@en .
+
+lso:statementDepth a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "statement depth"@en ;
+    rdfs:domain lso:StandardStatement ;
+    rdfs:range xsd:nonNegativeInteger .
+
+lso:appliesToLevel a owl:ObjectProperty ;
+    rdfs:label "applies to level"@en ;
+    rdfs:domain lso:StandardStatement ;
+    rdfs:range lso:EducationLevel .
+
+lso:publishedBy a owl:ObjectProperty ;
+    rdfs:label "published by"@en ;
+    rdfs:domain lso:StandardsDocument ;
+    rdfs:range lso:Jurisdiction .
+
+lso:documentTitle a owl:DatatypeProperty ;
+    rdfs:label "document title"@en ;
+    rdfs:domain lso:StandardsDocument ;
+    rdfs:range xsd:string .
+
+lso:subjectArea a owl:DatatypeProperty ;
+    rdfs:label "subject area"@en ;
+    rdfs:domain lso:StandardsDocument ;
+    rdfs:range xsd:string .
+
+lso:sourceURL a owl:DatatypeProperty ;
+    rdfs:label "source URL"@en ;
+    rdfs:domain lso:StandardsDocument ;
+    rdfs:range xsd:anyURI .
+
+lso:licenceLabel a owl:DatatypeProperty ;
+    rdfs:label "licence label"@en ;
+    rdfs:domain lso:StandardsDocument ;
+    rdfs:range xsd:string .
+
+################################################################
+# 5. Adoption as a reified, time-bounded act
+################################################################
+
+lso:adoptionOf a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "adoption of"@en ;
+    rdfs:domain lso:Adoption ;
+    rdfs:range lso:StandardsDocument .
+
+lso:adoptedBy a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "adopted by"@en ;
+    rdfs:domain lso:Adoption ;
+    rdfs:range lso:Jurisdiction .
+
+lso:adoptionStatus a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "adoption status"@en ;
+    rdfs:domain lso:Adoption ;
+    rdfs:range xsd:string ;
+    skos:definition "Published, Deprecated, Draft, or Unstated. Unstated is recorded explicitly rather than left absent, because a missing status and a known-absent status are different facts."@en .
+
+lso:validFrom a owl:DatatypeProperty ;
+    rdfs:label "valid from"@en ;
+    rdfs:domain lso:Adoption ;
+    rdfs:range xsd:gYear .
+
+################################################################
+# 6. Alignment, with refutability recorded
+################################################################
+
+lso:AlignmentAssertion a owl:Class ;
+    rdfs:label "Alignment Assertion"@en ;
+    skos:definition """A claim that two standards artefacts stand in some correspondence: that one
+matches, narrows, broadens or merely relates to the other. Reified because alignment claims come
+from named sources, disagree with each other, and are the single most consequential and least
+evidenced object in education data."""@en .
+
+lso:alignmentSource a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "alignment source"@en ;
+    rdfs:domain lso:AlignmentAssertion ;
+    rdfs:range lso:StandardStatement .
+
+lso:alignmentTarget a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "alignment target"@en ;
+    rdfs:domain lso:AlignmentAssertion ;
+    rdfs:range lso:StandardStatement .
+
+lso:alignmentPredicate a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "alignment predicate"@en ;
+    rdfs:domain lso:AlignmentAssertion ;
+    rdfs:range lso:AlignmentPredicate .
+
+lso:AlignmentPredicate a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Alignment Predicate"@en ;
+    skos:definition "The kind of correspondence claimed, drawn from the LSO alignment predicate scheme."@en .
+
+lso:RefutationCriterion a owl:Class ;
+    rdfs:label "Refutation Criterion"@en ;
+    skos:definition """A statable condition whose truth would falsify an alignment claim. An alignment
+carrying no refutation criterion is unfalsifiable, and LSO records that rather than pretending
+otherwise."""@en .
+
+lso:refutableBy a owl:ObjectProperty ;
+    rdfs:label "refutable by"@en ;
+    rdfs:domain lso:AlignmentAssertion ;
+    rdfs:range lso:RefutationCriterion .
+
+lso:falsifiabilityGrade a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "falsifiability grade"@en ;
+    rdfs:domain lso:AlignmentAssertion ;
+    rdfs:range xsd:string ;
+    skos:definition """One of: machine-refutable, where a constraint in this ontology can reject the
+claim outright; evidence-refutable, where refutation requires evidence outside the graph; or
+unfalsifiable, where no stated condition would count against the claim."""@en .
+
+lso:UnfalsifiableAlignment a owl:Class ;
+    rdfs:label "Unfalsifiable Alignment"@en ;
+    rdfs:subClassOf lso:AlignmentAssertion ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( lso:AlignmentAssertion
+                             [ a owl:Restriction ;
+                               owl:onProperty lso:refutableBy ;
+                               owl:maxCardinality "0"^^xsd:nonNegativeInteger ] ) ] ;
+    skos:definition "An alignment claim with no stated refutation criterion. Defined so that a reasoner classifies these automatically rather than leaving them to be counted by hand."@en .
+
+################################################################
+# 7. Classes that a reasoner derives, so link rot becomes an entailment
+################################################################
+
+lso:DeadIdentifierAssertion a owl:Class ;
+    rdfs:label "Dead Identifier Assertion"@en ;
+    rdfs:subClassOf lso:IdentifierAssertion ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( lso:IdentifierAssertion
+                             [ a owl:Restriction ;
+                               owl:onProperty lso:resolution ;
+                               owl:someValuesFrom [ a owl:Restriction ;
+                                                    owl:onProperty lso:resolves ;
+                                                    owl:hasValue false ] ] ) ] ;
+    skos:definition "An identifier asserted against a dereferenceable scheme that was observed not to dereference."@en .
+
+lso:OrphanedStatement a owl:Class ;
+    rdfs:label "Orphaned Statement"@en ;
+    rdfs:subClassOf lso:StandardStatement ;
+    skos:definition """A standard statement whose only globally scoped identifier is dead: it is still
+published, still cited, and no longer resolvable to anything. Populated by the pipeline, not asserted
+by hand."""@en .
+
+lso:surrogateContainer a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "surrogate container"@en ;
+    rdfs:domain lso:StandardsDocument ;
+    rdfs:range xsd:boolean ;
+    skos:definition """True when this document node was created by the pipeline to hold statements
+whose source record names no document, rather than corresponding to a document the source actually
+declares. Flagged so that a count of documents can distinguish published works from containers this
+pipeline invented to keep the hierarchy well-formed."""@en .

@@ -1,0 +1,175 @@
+@prefix lso:  <https://learning.tesseract.academy/lso#> .
+@prefix lsos: <https://learning.tesseract.academy/lso/scheme/> .
+@prefix lsh:  <https://learning.tesseract.academy/lso/shape/> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+################################################################
+# LSO SHACL layer 3: cross-source governance rules.
+#
+# These are the rules that only bite once data from more than one source is in the same graph.
+# Each is written as SHACL-SPARQL so it is portable to any conforming engine; the reference
+# pipeline also executes each one set-based, and the two results are cross-checked against each
+# other on every build. A rule that cannot be executed both ways is a rule that has not been tested.
+################################################################
+
+################################################################
+# R1 — Orphaned statement: still published, still cited, no longer resolvable.
+################################################################
+lsh:R1_OrphanedStatement a sh:NodeShape ;
+    rdfs:label "R1 Orphaned statement"@en ;
+    sh:targetClass lso:StandardStatement ;
+    sh:sparql [
+        sh:severity sh:Violation ;
+        sh:message "R1: statement's only globally scoped identifier ({?value}) was observed not to resolve, so nothing downstream can dereference it." ;
+        sh:select """
+            SELECT $this ?value WHERE {
+              $this <https://learning.tesseract.academy/lso#identifiedBy> ?ia .
+              ?ia <https://learning.tesseract.academy/lso#identifierScheme> ?scheme ;
+                  <https://learning.tesseract.academy/lso#identifierValue>  ?value ;
+                  <https://learning.tesseract.academy/lso#resolution>       ?obs .
+              ?scheme <https://learning.tesseract.academy/lso#dereferenceable> true .
+              ?obs <https://learning.tesseract.academy/lso#resolves> false .
+              FILTER NOT EXISTS {
+                $this <https://learning.tesseract.academy/lso#identifiedBy> ?ia2 .
+                ?ia2 <https://learning.tesseract.academy/lso#identifierScheme> ?s2 ;
+                     <https://learning.tesseract.academy/lso#resolution>       ?o2 .
+                ?s2  <https://learning.tesseract.academy/lso#globallyUnique>   true .
+                ?o2  <https://learning.tesseract.academy/lso#resolves>         true .
+              }
+            }""" ] .
+
+################################################################
+# R2 — Structural edge presented as an alignment.
+################################################################
+lsh:R2_IntraDocumentAlignment a sh:NodeShape ;
+    rdfs:label "R2 Intra-document alignment"@en ;
+    sh:targetClass lso:AlignmentAssertion ;
+    sh:sparql [
+        sh:severity sh:Warning ;
+        sh:message "R2: both endpoints lie in the same document, so this is document structure, not a correspondence between frameworks." ;
+        sh:select """
+            SELECT $this WHERE {
+              $this <https://learning.tesseract.academy/lso#alignmentSource> ?s ;
+                    <https://learning.tesseract.academy/lso#alignmentTarget> ?t ;
+                    <https://learning.tesseract.academy/lso#alignmentPredicate> ?p .
+              ?s <https://learning.tesseract.academy/lso#inDocument> ?d .
+              ?t <https://learning.tesseract.academy/lso#inDocument> ?d .
+              FILTER (?p != <https://learning.tesseract.academy/lso/scheme/isChildOf>)
+            }""" ] .
+
+################################################################
+# R3 — Unfalsifiable alignment: no condition would count against it.
+################################################################
+lsh:R3_UnfalsifiableAlignment a sh:NodeShape ;
+    rdfs:label "R3 Unfalsifiable alignment"@en ;
+    sh:targetClass lso:AlignmentAssertion ;
+    sh:sparql [
+        sh:severity sh:Warning ;
+        sh:message "R3: alignment states no refutation criterion and uses a predicate whose default grade is unfalsifiable, so no observation could ever count against it." ;
+        sh:select """
+            SELECT $this WHERE {
+              $this <https://learning.tesseract.academy/lso#alignmentPredicate> ?p .
+              ?p <https://learning.tesseract.academy/lso#defaultFalsifiability> "unfalsifiable" .
+              FILTER NOT EXISTS { $this <https://learning.tesseract.academy/lso#refutableBy> ?r }
+            }""" ] .
+
+################################################################
+# R4 — Identifier collision: one name, two things.
+################################################################
+lsh:R4_IdentifierCollision a sh:NodeShape ;
+    rdfs:label "R4 Identifier collision"@en ;
+    sh:targetClass lso:IdentifierScheme ;
+    sh:sparql [
+        sh:severity sh:Violation ;
+        sh:message "R4: value {?value} in a scheme declared globally unique names {?n} distinct artefacts." ;
+        sh:select """
+            SELECT $this ?value (COUNT(DISTINCT ?artefact) AS ?n) WHERE {
+              $this <https://learning.tesseract.academy/lso#globallyUnique> true .
+              ?artefact <https://learning.tesseract.academy/lso#identifiedBy> ?ia .
+              ?ia <https://learning.tesseract.academy/lso#identifierScheme> $this ;
+                  <https://learning.tesseract.academy/lso#identifierValue>  ?value .
+            }
+            GROUP BY $this ?value
+            HAVING (COUNT(DISTINCT ?artefact) > 1)""" ] .
+
+################################################################
+# R5 — Deprecated document still receiving alignment traffic.
+################################################################
+lsh:R5_AlignmentToDeprecated a sh:NodeShape ;
+    rdfs:label "R5 Alignment to a deprecated document"@en ;
+    sh:targetClass lso:AlignmentAssertion ;
+    sh:sparql [
+        sh:severity sh:Warning ;
+        sh:message "R5: alignment targets a statement in a document every one of whose adoptions is Deprecated." ;
+        sh:select """
+            SELECT $this WHERE {
+              $this <https://learning.tesseract.academy/lso#alignmentTarget> ?t .
+              ?t <https://learning.tesseract.academy/lso#inDocument> ?d .
+              ?ad <https://learning.tesseract.academy/lso#adoptionOf> ?d ;
+                  <https://learning.tesseract.academy/lso#adoptionStatus> "Deprecated" .
+              FILTER NOT EXISTS {
+                ?ad2 <https://learning.tesseract.academy/lso#adoptionOf> ?d ;
+                     <https://learning.tesseract.academy/lso#adoptionStatus> ?st .
+                FILTER (?st != "Deprecated")
+              }
+            }""" ] .
+
+################################################################
+# R6 — Unredistributable document: no licence stated.
+################################################################
+lsh:R6_NoLicence a sh:NodeShape ;
+    rdfs:label "R6 Document without a stated licence"@en ;
+    sh:targetClass lso:StandardsDocument ;
+    sh:sparql [
+        sh:severity sh:Warning ;
+        sh:message "R6: document states no licence, so its statements cannot be redistributed even though they are public policy." ;
+        sh:select """
+            SELECT $this WHERE {
+              $this a <https://learning.tesseract.academy/lso#StandardsDocument> .
+              FILTER NOT EXISTS { $this <https://learning.tesseract.academy/lso#licenceLabel> ?l }
+            }""" ] .
+
+################################################################
+# R7 — The machine refutation: an exact match that cannot be exact.
+#
+# This is the rule that makes the falsifiability claim concrete. If two statements are asserted
+# to be exact matches, and one is an ancestor of the other, the claim is self-contradictory:
+# a statement cannot both contain and equal another. No incumbent standard can express this,
+# which is why injected mis-mappings survive validation against them.
+################################################################
+lsh:R7_ExactMatchContradiction a sh:NodeShape ;
+    rdfs:label "R7 Exact match between a statement and its own ancestor"@en ;
+    sh:targetClass lso:AlignmentAssertion ;
+    sh:sparql [
+        sh:severity sh:Violation ;
+        sh:message "R7: an exact match is asserted between a statement and one of its own ancestors, which cannot hold: containment and equality are incompatible." ;
+        sh:select """
+            SELECT $this WHERE {
+              $this <https://learning.tesseract.academy/lso#alignmentPredicate> <https://learning.tesseract.academy/lso/scheme/exactMatch> ;
+                    <https://learning.tesseract.academy/lso#alignmentSource> ?s ;
+                    <https://learning.tesseract.academy/lso#alignmentTarget> ?t .
+              { ?s <https://learning.tesseract.academy/lso#hasAncestorStatement> ?t }
+              UNION
+              { ?t <https://learning.tesseract.academy/lso#hasAncestorStatement> ?s }
+            }""" ] .
+
+################################################################
+# R8 — Narrow match asserted in both directions.
+################################################################
+lsh:R8_NarrowMatchCycle a sh:NodeShape ;
+    rdfs:label "R8 Narrow match asserted in both directions"@en ;
+    sh:targetClass lso:AlignmentAssertion ;
+    sh:sparql [
+        sh:severity sh:Violation ;
+        sh:message "R8: two statements are each asserted to be strictly narrower than the other, which is inconsistent." ;
+        sh:select """
+            SELECT $this WHERE {
+              $this <https://learning.tesseract.academy/lso#alignmentPredicate> <https://learning.tesseract.academy/lso/scheme/narrowMatch> ;
+                    <https://learning.tesseract.academy/lso#alignmentSource> ?s ;
+                    <https://learning.tesseract.academy/lso#alignmentTarget> ?t .
+              ?other <https://learning.tesseract.academy/lso#alignmentPredicate> <https://learning.tesseract.academy/lso/scheme/narrowMatch> ;
+                     <https://learning.tesseract.academy/lso#alignmentSource> ?t ;
+                     <https://learning.tesseract.academy/lso#alignmentTarget> ?s .
+            }""" ] .

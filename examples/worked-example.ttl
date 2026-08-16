@@ -1,0 +1,149 @@
+@prefix lso:  <https://learning.tesseract.academy/lso#> .
+@prefix lsos: <https://learning.tesseract.academy/lso/scheme/> .
+@prefix lsod: <https://learning.tesseract.academy/lso/id/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+################################################################
+# One real standard, all the way down.
+#
+# AP Microeconomics (2022), learning objective POL-5.B, "Explain sources of income and wealth
+# inequality." Every value below is copied from live public sources, not invented:
+#
+#   Common Standards Project API   the statement, its ancestors, its ASN identifiers, its licence
+#   asn.jesandco.org               the observed HTTP status of each ASN identifier, 16 Aug 2026
+#
+# The point of the example is the last block. This standard is current, published, in force, and
+# carries a globally unique identifier that resolves to nothing. There is no error state anywhere
+# in the source data that says so: the identifier is simply printed, and downstream systems assume.
+################################################################
+
+lsod:source-csp a prov:Agent ;
+    rdfs:label "Common Standards Project public API" .
+lsod:source-asn-census a prov:Agent ;
+    rdfs:label "LSO ASN resolution census, 16 August 2026" .
+
+################################################################
+# Jurisdiction and document
+################################################################
+
+lsod:jurisdiction_0A5FD99233A74D8FA3A74F52E5F6CDEC
+    a lso:Jurisdiction ;
+    rdfs:label "AP/College Board" ;
+    lso:identifiedBy [
+        a lso:IdentifierAssertion ;
+        lso:identifierScheme lsos:CSP ;
+        lso:identifierValue "0A5FD99233A74D8FA3A74F52E5F6CDEC" ;
+        lso:assertedBy lsod:source-csp ] .
+
+lsod:document_D21370019
+    a lso:StandardsDocument ;
+    rdfs:label "AP Microeconomics" ;
+    lso:documentTitle "AP Microeconomics" ;
+    lso:subjectArea "AP Microeconomics" ;
+    lso:publishedBy lsod:jurisdiction_0A5FD99233A74D8FA3A74F52E5F6CDEC ;
+    lso:sourceURL "https://apcentral.collegeboard.org/media/pdf/ap-microeconomics-course-and-exam-description.pdf"^^xsd:anyURI ;
+    lso:identifiedBy lsod:idassert_d_D21370019_asn .
+
+# NOTE: no lso:licenceLabel. The source record carries a rights holder, "D2L Corporation", and a
+# licence title of null. SHACL rule R6 fires on this document, which is the intended behaviour:
+# public curriculum policy with no stated licence cannot lawfully be redistributed, and the absence
+# is recorded rather than papered over with an assumed default.
+
+lsod:adoption_D21370019_collegeboard
+    a lso:Adoption ;
+    lso:adoptionOf lsod:document_D21370019 ;
+    lso:adoptedBy lsod:jurisdiction_0A5FD99233A74D8FA3A74F52E5F6CDEC ;
+    lso:adoptionStatus "Published" ;
+    lso:validFrom "2022"^^xsd:gYear .
+
+################################################################
+# The statement and its containment chain
+################################################################
+
+lsod:statement_S21370042
+    a lso:StandardStatement ;
+    lso:inDocument lsod:document_D21370019 ;
+    lso:statementText "Course Content" ;
+    lso:statementDepth "0"^^xsd:nonNegativeInteger .
+
+lsod:statement_S21370132
+    a lso:StandardStatement ;
+    lso:inDocument lsod:document_D21370019 ;
+    lso:statementText "Market Failure and the Role of Government" ;
+    lso:humanCodingScheme "U.6" ;
+    lso:statementDepth "1"^^xsd:nonNegativeInteger ;
+    lso:hasParentStatement lsod:statement_S21370042 ;
+    lso:hasAncestorStatement lsod:statement_S21370042 .
+
+lsod:statement_S21370147
+    a lso:StandardStatement ;
+    lso:inDocument lsod:document_D21370019 ;
+    lso:statementText "Explain sources of income and wealth inequality." ;
+    lso:humanCodingScheme "POL-5.B" ;
+    lso:statementDepth "2"^^xsd:nonNegativeInteger ;
+    lso:hasParentStatement lsod:statement_S21370132 ;
+    lso:hasAncestorStatement lsod:statement_S21370132 , lsod:statement_S21370042 ;
+    lso:identifiedBy lsod:idassert_s_S21370147_asn ,
+                     lsod:idassert_s_S21370147_csp ,
+                     lsod:idassert_s_S21370147_hcs .
+
+################################################################
+# Three names for one statement, and only one of them is a name at all
+################################################################
+
+lsod:idassert_s_S21370147_csp
+    a lso:IdentifierAssertion ;
+    lso:identifierScheme lsos:CSP ;
+    lso:identifierValue "703D7CCA485A46FFA3FE92D0D288B599" ;
+    lso:assertedBy lsod:source-csp .
+
+lsod:idassert_s_S21370147_hcs
+    a lso:IdentifierAssertion ;
+    lso:identifierScheme lsos:HumanCodingScheme ;
+    lso:identifierValue "POL-5.B" ;
+    lso:assertedBy lsod:source-csp .
+# POL-5.B is what a teacher writes on a lesson plan. It is not unique outside this one document:
+# the registry marks lsos:HumanCodingScheme as lso:globallyUnique false and lso:mintedPer
+# "per-document", so any system joining two frameworks on this value is joining on a label.
+
+lsod:idassert_s_S21370147_asn
+    a lso:IdentifierAssertion ;
+    lso:identifierScheme lsos:ASN ;
+    lso:identifierValue "S21370147" ;
+    lso:assertedBy lsod:source-csp ;
+    lso:resolution lsod:obs_asn_S21370147 .
+
+lsod:idassert_d_D21370019_asn
+    a lso:IdentifierAssertion ;
+    lso:identifierScheme lsos:ASN ;
+    lso:identifierValue "D21370019" ;
+    lso:assertedBy lsod:source-csp ;
+    lso:resolution lsod:obs_asn_D21370019 .
+
+################################################################
+# The observation that no incumbent standard has anywhere to put
+################################################################
+
+lsod:obs_asn_S21370147
+    a lso:ResolutionObservation ;
+    lso:resolutionStatus "404" ;
+    lso:resolves false ;
+    lso:observedAt "2026-08-16T00:00:00+00:00"^^xsd:dateTime ;
+    lso:finalURL "https://asn.jesandco.org/resources/S21370147"^^xsd:anyURI ;
+    prov:wasAttributedTo lsod:source-asn-census .
+
+lsod:obs_asn_D21370019
+    a lso:ResolutionObservation ;
+    lso:resolutionStatus "404" ;
+    lso:resolves false ;
+    lso:observedAt "2026-08-16T00:00:00+00:00"^^xsd:dateTime ;
+    lso:finalURL "https://asn.jesandco.org/resources/D21370019"^^xsd:anyURI ;
+    prov:wasAttributedTo lsod:source-asn-census .
+
+# Both assertions above are therefore instances of lso:DeadIdentifierAssertion by entailment, and
+# lsod:statement_S21370147 is reported by rule R1: its only globally unique, dereferenceable
+# identifier does not dereference. The canonical form, http://purl.org/ASN/resources/S21370147,
+# redirects to the URL recorded above and returns the same 404. Verified in both forms.

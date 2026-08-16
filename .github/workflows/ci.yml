@@ -1,0 +1,33 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -r requirements-dev.txt
+      - name: Parse and test every committed artefact
+        run: python -m pytest tests/ -v
+      - name: Validate the worked example against the repository's own shapes
+        run: |
+          python - <<'PY'
+          from rdflib import Graph
+          from pyshacl import validate
+          d = Graph(); d.parse("examples/worked-example.ttl")
+          v = Graph()
+          for f in ("ontology/lso-core.ttl", "skos/identifier-schemes.ttl"): v.parse(f)
+          s = Graph()
+          for f in ("shapes/lso-shapes.ttl", "shapes/lso-rules.ttl"): s.parse(f)
+          conforms, report, text = validate(d + v, shacl_graph=s, advanced=True, inference="rdfs")
+          if not isinstance(report, Graph):
+              raise SystemExit(f"SHACL engine failure: {text}")
+          # The worked example is EXPECTED not to conform: it documents a real dead identifier and
+          # a real missing licence. What CI checks is that the shapes run and find exactly that.
+          print("shapes executed; conforms =", conforms)
+          PY

@@ -1,0 +1,15 @@
+# Documents that one jurisdiction has deprecated while another still has them in force.
+# The same standards, simultaneously current and obsolete, depending on who you ask.
+PREFIX lso:  <https://learning.tesseract.academy/lso#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?doc ?title (COUNT(DISTINCT ?liveJ) AS ?liveAdoptions) (COUNT(DISTINCT ?deadJ) AS ?deprecatedAdoptions)
+WHERE {
+  ?doc a lso:StandardsDocument .
+  OPTIONAL { ?doc lso:documentTitle ?title }
+  ?aLive a lso:Adoption ; lso:adoptionOf ?doc ; lso:adoptedBy ?liveJ ; lso:adoptionStatus "Published" .
+  ?aDead a lso:Adoption ; lso:adoptionOf ?doc ; lso:adoptedBy ?deadJ ; lso:adoptionStatus "Deprecated" .
+}
+GROUP BY ?doc ?title
+ORDER BY DESC(?deprecatedAdoptions)
+LIMIT 50

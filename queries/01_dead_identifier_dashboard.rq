@@ -1,0 +1,16 @@
+# How much of the ASN identifier space still resolves, by scheme and observed status.
+# The single query that turns "link rot" from an anecdote into a number.
+PREFIX lso:  <https://learning.tesseract.academy/lso#>
+PREFIX lsos: <https://learning.tesseract.academy/lso/scheme/>
+
+SELECT ?scheme ?status (COUNT(DISTINCT ?assertion) AS ?assertions)
+                       (SUM(?citations) AS ?totalCitations)
+WHERE {
+  ?assertion a lso:IdentifierAssertion ;
+             lso:identifierScheme ?scheme ;
+             lso:resolution ?obs .
+  ?obs lso:resolutionStatus ?status .
+  OPTIONAL { ?assertion lso:citationCount ?citations }
+}
+GROUP BY ?scheme ?status
+ORDER BY DESC(?assertions)
