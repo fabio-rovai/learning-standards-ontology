@@ -1,0 +1,27 @@
+{
+  "upload_type": "software",
+  "title": "Learning Standards Ontology (LSO)",
+  "description": "An open OWL 2 ontology, SKOS identifier-scheme registry and SHACL governance layer for K-12 academic standards, built and measured against the public standards corpus: 1,931,913 standard statements across 23,700 standard sets and 771 jurisdictions, joined into a 21,404,069-triple knowledge graph gated by SHACL. Its central finding is that every dereferenced Achievement Standards Network identifier returns HTTP 404 (67,141 identifiers across three censuses, zero resolving) while the schema that describes them still resolves; identifiers are therefore modelled as first-class nodes whose resolvability is recorded data. Ontology, registry, shapes and documentation are CC BY 4.0; pipeline code is MIT.",
+  "creators": [
+    {
+      "name": "Rovai, Fabio",
+      "affiliation": "The Tesseract Academy (Kampakis and Co Ltd)"
+    }
+  ],
+  "license": "cc-by-4.0",
+  "keywords": [
+    "ontology",
+    "SHACL",
+    "education",
+    "learning standards",
+    "K-12",
+    "register assurance",
+    "identifier governance"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/fabio-rovai/learning-standards-ontology"
+    }
+  ]
+}
