@@ -12,3 +12,4 @@ abstract: >-
   standards, together with a census of identifier resolvability across the public standards corpus
   and a measurement of what the incumbent standards can and cannot reject.
 license: CC-BY-4.0
+version: 0.1.0
